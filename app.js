@@ -4,6 +4,23 @@ const http = require("http");
 /*pending an actual database*/
 var dataStore = [{name: "Mandai Crematorium Indent", internalUID: 0, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}, {name: "Mandai Crematorium Indent", internalUID: 1, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}, {name: "Mandai Crematorium Indent", internalUID: 2, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}]
 var notificationsStore = [{title: "Mandai Crematorium Indent is now Pending", internalUID: 0}]
+
+const writeDataStore = (internalUID, write) => {
+  const index = dataStore.findIndex(x => x.internalUID === internalUID)
+  dataStore = [...dataStore]
+  if (index > -1 && index < dataStore.length) {
+    //MOCK SERVER, REMOVE IN PRODUCTION
+    dataStore[index] = write
+  }
+}
+
+const appendDataStore = (write) => {
+  dataStore = [...dataStore, {...write, internalUID: internalUID}]
+  internalUID++
+}
+
+var internalUID = 3
+
 /*end*/
 
 const port = process.env.PORT || 4001;
@@ -40,7 +57,43 @@ io.on("connection", (socket) => {
   socket.on("ToAPI", (msg) => {
     console.log("From client: "+msg)
   })
+  socket.on("requestIndents", () => {
+    socket.emit("sendIndents", dataStore)
+  })
+  socket.on("requestNotifications", () => {
+    socket.emit("sendNotifications", notificationsStore)
+  })
+  socket.on("writeDataStore", ([internalUID, write, token]) => {
+    try {
+      writeDataStore(internalUID, write)
+      socket.emit("sendIndents", dataStore, token)
+    }
+    catch {
+
+    }
+  })
+  socket.on("appendDataStore", ([write, token]) => {
+    try {
+      appendDataStore(write)
+      socket.emit("sendIndents", dataStore, token)
+    }
+    catch {
+
+    }
+  })
 });
+
+const notifyN = () => {
+  for (socket of sockets) {
+    socket.emit("sendNotifications", notificationsStore)
+  }
+}
+
+const notifyI = () => {
+  for (socket of sockets) {
+    socket.emit("sendIndents", dataStore)
+  }
+}
 
 const getApiAndEmit = socket => {
   const response = new Date();
