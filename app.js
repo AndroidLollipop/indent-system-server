@@ -5,11 +5,22 @@ const http = require("http");
 var dataStore = [{name: "Mandai Crematorium Indent", internalUID: 0, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}, {name: "Mandai Crematorium Indent", internalUID: 1, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}, {name: "Mandai Crematorium Indent", internalUID: 2, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}]
 var notificationsStore = [{title: "Mandai Crematorium Indent is now Pending", internalUID: 0}]
 
+const readDataStore = (internalUID) => {
+  const result = dataStore.filter(x => x.internalUID === internalUID)
+  if (result.length === 0) {
+    return undefined
+  }
+  else {
+    return result[0]
+  }
+}
+
 const writeDataStore = (internalUID, write) => {
   const index = dataStore.findIndex(x => x.internalUID === internalUID)
   dataStore = [...dataStore]
   if (index > -1 && index < dataStore.length) {
     //MOCK SERVER, REMOVE IN PRODUCTION
+    acknowledgeEdit(write, dataStore[index])
     dataStore[index] = write
   }
 }
@@ -20,6 +31,18 @@ const appendDataStore = (write) => {
 }
 
 var internalUID = 3
+
+const appendNotifications = (write) => {
+  notificationsStore = [...notificationsStore, write]
+}
+
+const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: oldStatus}) => {
+  if (status !== oldStatus && internalUID === oldUID) {
+    appendNotifications({title: readDataStore(internalUID).name+" is now "+status, internalUID: internalUID})
+    console.log(notificationsStore)
+    notifyN()
+  }
+}
 
 /*end*/
 
@@ -66,7 +89,8 @@ io.on("connection", (socket) => {
   socket.on("writeDataStore", ([internalUID, write, token]) => {
     try {
       writeDataStore(internalUID, write)
-      socket.emit("sendIndents", dataStore, token)
+      socket.emit("sendIndents", dataStore)
+      notifyI(socket)
     }
     catch {
 
@@ -76,6 +100,7 @@ io.on("connection", (socket) => {
     try {
       appendDataStore(write)
       socket.emit("sendIndents", dataStore, token)
+      notifyI(socket)
     }
     catch {
 
@@ -83,15 +108,19 @@ io.on("connection", (socket) => {
   })
 });
 
-const notifyN = () => {
+const notifyN = (except) => {
   for (socket of sockets) {
-    socket.emit("sendNotifications", notificationsStore)
+    if (socket !== except) {
+      socket.emit("sendNotifications", notificationsStore)
+    }
   }
 }
 
-const notifyI = () => {
+const notifyI = (except) => {
   for (socket of sockets) {
-    socket.emit("sendIndents", dataStore)
+    if (socket !== except) {
+      socket.emit("sendIndents", dataStore)
+    }
   }
 }
 
