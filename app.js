@@ -28,6 +28,9 @@ io.on("connection", (socket) => {
     console.log("Client disconnected");
     clearInterval(interval);
   });
+  socket.on("ToAPI", (msg) => {
+    console.log("From client: "+msg)
+  })
 });
 
 const getApiAndEmit = socket => {
