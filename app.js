@@ -1,9 +1,12 @@
 const express = require("express");
 const http = require("http");
 
-/*pending an actual database*/
-var dataStore = [{name: "Mandai Crematorium Indent", internalUID: 0, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}, {name: "Mandai Crematorium Indent", internalUID: 1, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}, {name: "Mandai Crematorium Indent", internalUID: 2, startDateTime: "01/04/2020 12:34", endDateTime: "01/04/2020 23:45", POC: "lmao", POCPhone: "999", origin: "Hell Camp", destination: "Hellish Camp", status: "Pending"}]
-var notificationsStore = [{title: "Mandai Crematorium Indent is now Pending", internalUID: 0}]
+const fs = require('fs')
+var internalUID = JSON.parse(fs.readFileSync("./defaultData/uid.json"))
+const dataString = fs.readFileSync("./defaultData/dataStore.json")
+const notificationsString = fs.readFileSync("./defaultData/notificationsStore.json")
+var dataStore = JSON.parse(dataString)
+var notificationsStore = JSON.parse(notificationsString)
 
 const readDataStore = (internalUID) => {
   const result = dataStore.filter(x => x.internalUID === internalUID)
@@ -15,25 +18,41 @@ const readDataStore = (internalUID) => {
   }
 }
 
+const overwriteDS = () => {
+  const dataJSON = JSON.stringify(dataStore)
+  fs.writeFile('./defaultData/dataStore.json', dataJSON, ()=>{})
+}
+
+const overwriteNS = () => {
+  const notificationsJSON = JSON.stringify(notificationsStore)
+  fs.writeFile('./defaultData/notificationsStore.json', notificationsJSON, ()=>{})
+}
+
+const overwriteUID = () => {
+  fs.writeFile('./defaultData/uid.json', JSON.stringify(internalUID), ()=>{})
+}
+
 const writeDataStore = (internalUID, write) => {
   const index = dataStore.findIndex(x => x.internalUID === internalUID)
-  dataStore = [...dataStore]
   if (index > -1 && index < dataStore.length) {
+    dataStore = [...dataStore]
     //MOCK SERVER, REMOVE IN PRODUCTION
     acknowledgeEdit(write, dataStore[index])
     dataStore[index] = write
+    overwriteDS()
   }
 }
 
 const appendDataStore = (write) => {
   dataStore = [...dataStore, {...write, internalUID: internalUID}]
   internalUID++
+  overwriteUID()
+  overwriteDS()
 }
-
-var internalUID = 3
 
 const appendNotifications = (write) => {
   notificationsStore = [...notificationsStore, write]
+  overwriteNS()
 }
 
 const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: oldStatus}) => {
@@ -42,8 +61,6 @@ const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: ol
     notifyN()
   }
 }
-
-/*end*/
 
 const port = process.env.PORT || 4001;
 const index = require("./routes/index");
