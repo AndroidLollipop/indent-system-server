@@ -39,7 +39,6 @@ const appendNotifications = (write) => {
 const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: oldStatus}) => {
   if (status !== oldStatus && internalUID === oldUID) {
     appendNotifications({title: readDataStore(internalUID).name+" is now "+status, internalUID: internalUID})
-    console.log(notificationsStore)
     notifyN()
   }
 }
