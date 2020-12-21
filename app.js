@@ -72,7 +72,7 @@ const server = http.createServer(app);
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "https://androidlollipop.github.io/indent-system/",
+    origin: "https://androidlollipop.github.io",
     methods: ["GET", "POST"]
   }
 });
