@@ -62,7 +62,7 @@ const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: ol
   }
 }
 
-const port = 80;
+const port = process.env.PORT || 4001;
 const index = require("./routes/index");
 
 const app = express();
