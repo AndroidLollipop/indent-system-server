@@ -77,17 +77,12 @@ const io = require("socket.io")(server, {
   }
 });
 
-let interval;
-
 var sockets = []
 
 io.on("connection", (socket) => {
   sockets.push(socket)
   console.log("New client connected");
-  if (interval) {
-    clearInterval(interval);
-  }
-  interval = setInterval(() => getApiAndEmit(socket), 1000);
+  const interval = setInterval(() => getApiAndEmit(socket), 1000);
   socket.on("disconnect", () => {
     sockets = sockets.filter(s => s !== socket)
     console.log("Client disconnected");
