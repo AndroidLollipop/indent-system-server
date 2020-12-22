@@ -82,15 +82,12 @@ var sockets = []
 io.on("connection", (socket) => {
   sockets.push(socket)
   console.log("New client connected");
-  const interval = setInterval(() => getApiAndEmit(socket), 1000);
+  const interval = setInterval(() => getApiAndEmit(socket), 20000);
   socket.on("disconnect", () => {
     sockets = sockets.filter(s => s !== socket)
     console.log("Client disconnected");
     clearInterval(interval);
   });
-  socket.on("ToAPI", (msg) => {
-    console.log("From client: "+msg)
-  })
   socket.on("requestIndents", () => {
     socket.emit("sendIndents", dataStore)
   })
