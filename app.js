@@ -1,5 +1,15 @@
+const { Client } = require("pg");
 const express = require("express");
 const http = require("http");
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+})
+
+client.connect()
 
 const fs = require('fs')
 var internalUID = JSON.parse(fs.readFileSync("./defaultData/uid.json"))
