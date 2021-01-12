@@ -37,9 +37,9 @@ client.query("SELECT my_data FROM mydata WHERE my_key='indents';", (err, res) =>
 client.query("SELECT my_data FROM mydata WHERE my_key='notifications';", (err, res) => {
   if (err) throw err;
   for (let row of res.rows) {
-    console.log(dataStore)
+    console.log(notificationsStore)
     notificationsStore = row["my_data"];
-    console.log(dataStore)
+    console.log(notificationsStore)
   }
 });
 
