@@ -11,12 +11,11 @@ const client = new Client({
 
 client.connect()
 
-client.query('SELECT * FROM mydata;', (err, res) => {
+client.query('SELECT my_data FROM mydata WHERE my_key=\'notifications\';', (err, res) => {
   if (err) throw err;
   for (let row of res.rows) {
     console.log(JSON.stringify(row));
   }
-  client.end();
 });
 
 const fs = require('fs')
