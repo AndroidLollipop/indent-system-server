@@ -2,6 +2,19 @@ const { Client } = require("pg");
 const express = require("express");
 const http = require("http");
 
+const postgresSafe = x => {
+  var ret = ""
+  for (char of x) {
+    if (char === "'"){
+      ret += "''"
+    }
+    else{
+      ret += char
+    }
+  }
+  return ret
+}
+
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -57,15 +70,24 @@ const readDataStore = (internalUID) => {
 
 const overwriteDS = () => {
   const dataJSON = JSON.stringify(dataStore)
+  client.query("UPDATE mydata SET my_data = '"+postgresSafe(dataJSON)+"' WHERE my_key='indents'", (err, res) => {
+    if (err) throw err;
+  })
   fs.writeFile('./defaultData/dataStore.json', dataJSON, ()=>{})
 }
 
 const overwriteNS = () => {
   const notificationsJSON = JSON.stringify(notificationsStore)
+  client.query("UPDATE mydata SET my_data = '"+postgresSafe(notificationsJSON)+"' WHERE my_key='notifications'", (err, res) => {
+    if (err) throw err;
+  })
   fs.writeFile('./defaultData/notificationsStore.json', notificationsJSON, ()=>{})
 }
 
 const overwriteUID = () => {
+  client.query("UPDATE mydata SET my_data = '"+postgresSafe(JSON.stringify(internalUID))+"' WHERE my_key='uid'", (err, res) => {
+    if (err) throw err;
+  })
   fs.writeFile('./defaultData/uid.json', JSON.stringify(internalUID), ()=>{})
 }
 
