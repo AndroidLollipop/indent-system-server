@@ -11,13 +11,6 @@ const client = new Client({
 
 client.connect()
 
-client.query('SELECT my_data FROM mydata WHERE my_key=\'notifications\';', (err, res) => {
-  if (err) throw err;
-  for (let row of res.rows) {
-    console.log(JSON.stringify(row));
-  }
-});
-
 const fs = require('fs')
 var internalUID = JSON.parse(fs.readFileSync("./defaultData/uid.json"))
 const dataString = fs.readFileSync("./defaultData/dataStore.json")
@@ -40,6 +33,15 @@ client.query("SELECT my_data FROM mydata WHERE my_key='notifications';", (err, r
     console.log(notificationsStore)
     notificationsStore = row["my_data"];
     console.log(notificationsStore)
+  }
+});
+
+client.query("SELECT my_data FROM mydata WHERE my_key='uid';", (err, res) => {
+  if (err) throw err;
+  for (let row of res.rows) {
+    console.log(internalUID)
+    internalUID = row["my_data"];
+    console.log(internalUID)
   }
 });
 
