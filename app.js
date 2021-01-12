@@ -25,6 +25,24 @@ const notificationsString = fs.readFileSync("./defaultData/notificationsStore.js
 var dataStore = JSON.parse(dataString)
 var notificationsStore = JSON.parse(notificationsString)
 
+client.query("SELECT my_data FROM mydata WHERE my_key='indents';", (err, res) => {
+  if (err) throw err;
+  for (let row of res.rows) {
+    console.log(dataStore)
+    dataStore = row["my_data"];
+    console.log(dataStore)
+  }
+});
+
+client.query("SELECT my_data FROM mydata WHERE my_key='notifications';", (err, res) => {
+  if (err) throw err;
+  for (let row of res.rows) {
+    console.log(dataStore)
+    notificationsStore = row["my_data"];
+    console.log(dataStore)
+  }
+});
+
 const readDataStore = (internalUID) => {
   const result = dataStore.filter(x => x.internalUID === internalUID)
   if (result.length === 0) {
