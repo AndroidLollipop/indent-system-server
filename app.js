@@ -11,6 +11,14 @@ const client = new Client({
 
 client.connect()
 
+client.query('SELECT table_schema,table_name FROM information_schema.tables;', (err, res) => {
+  if (err) throw err;
+  for (let row of res.rows) {
+    console.log(JSON.stringify(row));
+  }
+  client.end();
+});
+
 const fs = require('fs')
 var internalUID = JSON.parse(fs.readFileSync("./defaultData/uid.json"))
 const dataString = fs.readFileSync("./defaultData/dataStore.json")
