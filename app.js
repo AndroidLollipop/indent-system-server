@@ -31,12 +31,22 @@ const notificationsString = fs.readFileSync("./defaultData/notificationsStore.js
 var dataStore = JSON.parse(dataString)
 var notificationsStore = JSON.parse(notificationsString)
 
+client.query("SELECT my_data FROM mydata WHERE my_key='uid';", (err, res) => {
+  if (err) throw err;
+  for (let row of res.rows) {
+    console.log(internalUID)
+    internalUID = row["my_data"];
+    console.log(internalUID)
+  }
+});
+
 client.query("SELECT my_data FROM mydata WHERE my_key='indents';", (err, res) => {
   if (err) throw err;
   for (let row of res.rows) {
     console.log(dataStore)
     dataStore = row["my_data"];
     console.log(dataStore)
+    notifyI()
   }
 });
 
@@ -46,15 +56,7 @@ client.query("SELECT my_data FROM mydata WHERE my_key='notifications';", (err, r
     console.log(notificationsStore)
     notificationsStore = row["my_data"];
     console.log(notificationsStore)
-  }
-});
-
-client.query("SELECT my_data FROM mydata WHERE my_key='uid';", (err, res) => {
-  if (err) throw err;
-  for (let row of res.rows) {
-    console.log(internalUID)
-    internalUID = row["my_data"];
-    console.log(internalUID)
+    notifyN()
   }
 });
 
