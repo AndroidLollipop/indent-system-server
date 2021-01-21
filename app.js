@@ -171,7 +171,7 @@ const writeDataStore = (internalUID, write) => {
 }
 
 const appendDataStore = (write) => {
-  appendJSON(write)
+  appendJSON(JSON.stringify(write))
   dataStore = [...dataStore, {...write, internalUID: internalUID}]
   internalUID++
   overwriteUID()
