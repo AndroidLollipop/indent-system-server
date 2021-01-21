@@ -104,13 +104,13 @@ function authenticate(auth) {
   appendJSONs(myQueue)
 }
 
-function appendJSON(jsonString) {
-  appendJSONs([jsonString])
+function appendJSON(jsonObj) {
+  appendJSONs([jsonObj])
 }
 
-function appendJSONs(jsonStrings) {
+function appendJSONs(jsonObjs) {
   if (authenticated === false) {
-    queue.push(...jsonStrings)
+    queue.push(...jsonObjs)
     return
   }
   try {
@@ -120,7 +120,7 @@ function appendJSONs(jsonStrings) {
       valueInputOption: "RAW",
       resource: {
         majorDimension: "ROWS",
-        values: jsonStrings.map(x => [x])
+        values: jsonObjs.map(x => [JSON.stringify(x)])
       }
     }, (err, _)=>{
       if (err) return console.log('The API returned an error: ' + err)
@@ -131,7 +131,13 @@ function appendJSONs(jsonStrings) {
       valueInputOption: "RAW",
       resource: {
         majorDimension: "ROWS",
-        values: jsonStrings.map(x => [x.name, x.startDateTime, x.endDateTime, x.origin, x.destination, x.POC, x.POCPhone, x.vehicles, x.notes])
+        values: jsonObjs.map(x => {
+          const obj = {...x}
+          for (property in obj) {
+            obj[property] = ""+obj[property]
+          }
+          [obj.name, obj.startDateTime, obj.endDateTime, obj.origin, obj.destination, obj.POC, obj.POCPhone, obj.vehicles, obj.notes]
+        })
       }
     }, (err, _)=>{
       if (err) return console.log('The API returned an error: ' + err)
@@ -187,7 +193,7 @@ const writeDataStore = (internalUID, write) => {
 }
 
 const appendDataStore = (write) => {
-  appendJSON(JSON.stringify(write))
+  appendJSON(write)
   dataStore = [...dataStore, {...write, internalUID: internalUID}]
   internalUID++
   overwriteUID()
