@@ -113,6 +113,7 @@ function appendJSONs(jsonStrings) {
     queue.push(...jsonStrings)
     return
   }
+  console.log(jsonStrings)
   sheets.spreadsheets.values.append({
     spreadsheetId: '1Rdp0Z4CKpp5DH41ufeOzC1edE87Nf4DjswmsNYCiI6Q',
     range: 'IndentBackup!A2:A',
