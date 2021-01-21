@@ -8,7 +8,7 @@ const postgresSafe = x => {
     if (char === "'"){
       ret += "''"
     }
-    else{
+    else {
       ret += char
     }
   }
@@ -60,6 +60,72 @@ client.query("SELECT my_data FROM mydata WHERE my_key='notifications';", (err, r
   }
 });
 
+const readline = require('readline');
+const {google} = require('googleapis');
+
+// If modifying these scopes, delete token.json.
+const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
+// The file token.json stores the user's access and refresh tokens, and is
+// created automatically when the authorization flow completes for the first
+// time.
+
+// Load client secrets from a local file.
+authorize(JSON.parse(process.env.CREDENTIALS_JSON), authenticate);
+
+/**
+ * Create an OAuth2 client with the given credentials, and then execute the
+ * given callback function.
+ * @param {Object} credentials The authorization client credentials.
+ * @param {function} callback The callback to call with the authorized client.
+ */
+function authorize(credentials, callback) {
+  const {client_secret, client_id, redirect_uris} = credentials.installed;
+  const oAuth2Client = new google.auth.OAuth2(
+      client_id, client_secret, redirect_uris[0]);
+
+  // Check if we have previously stored a token.
+  oAuth2Client.setCredentials(JSON.parse(process.env.TOKEN_JSON));
+  callback(oAuth2Client);
+}
+
+/**
+ * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
+ */
+
+var authenticated = false
+var sheets
+var queue = []
+
+function authenticate(auth) {
+  sheets = google.sheets({version: 'v4', auth})
+  authenticated = true
+  const myQueue = queue
+  queue = []
+  appendJSONs(myQueue)
+}
+
+function appendJSON(jsonString) {
+  appendJSONs([jsonString])
+}
+
+function appendJSONs(jsonStrings) {
+  if (authenticated === false) {
+    queue.push(...jsonStrings)
+    return
+  }
+  sheets.spreadsheets.values.append({
+    spreadsheetId: '1Rdp0Z4CKpp5DH41ufeOzC1edE87Nf4DjswmsNYCiI6Q',
+    range: 'IndentBackup!A2:A',
+    valueInputOption: "RAW",
+    resource: {
+      majorDimension: "ROWS",
+      values: jsonStrings.map(x => [x])
+    }
+  }, (err, _)=>{
+    if (err) return console.log('The API returned an error: ' + err)
+  })
+}
+
 const readDataStore = (internalUID) => {
   const result = dataStore.filter(x => x.internalUID === internalUID)
   if (result.length === 0) {
@@ -105,6 +171,7 @@ const writeDataStore = (internalUID, write) => {
 }
 
 const appendDataStore = (write) => {
+  appendJSON(write)
   dataStore = [...dataStore, {...write, internalUID: internalUID}]
   internalUID++
   overwriteUID()
