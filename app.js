@@ -136,7 +136,7 @@ function appendJSONs(jsonObjs) {
           for (property in obj) {
             obj[property] = ""+obj[property]
           }
-          [obj.name, obj.startDateTime, obj.endDateTime, obj.origin, obj.destination, obj.POC, obj.POCPhone, obj.vehicles, obj.notes]
+          return [obj.name, obj.startDateTime, obj.endDateTime, obj.origin, obj.destination, obj.POC, obj.POCPhone, obj.vehicles, obj.notes]
         })
       }
     }, (err, _)=>{
