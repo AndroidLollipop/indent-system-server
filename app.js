@@ -60,6 +60,10 @@ client.query("SELECT my_data FROM mydata WHERE my_key='notifications';", (err, r
   }
 });
 
+var authenticated = false
+var sheets
+var queue = []
+
 const readline = require('readline');
 const {google} = require('googleapis');
 
@@ -92,16 +96,12 @@ function authorize(credentials, callback) {
  * @param {google.auth.OAuth2} auth The authenticated Google OAuth client.
  */
 
-var authenticated = false
-var sheets
-var queue = []
-
 function authenticate(auth) {
   sheets = google.sheets({version: 'v4', auth})
   authenticated = true
   const myQueue = queue
   queue = []
-  //appendJSONs(myQueue)
+  appendJSONs(myQueue)
 }
 
 function appendJSON(jsonString) {
@@ -113,7 +113,6 @@ function appendJSONs(jsonStrings) {
     queue.push(...jsonStrings)
     return
   }
-  console.log(jsonStrings)
   sheets.spreadsheets.values.append({
     spreadsheetId: '1Rdp0Z4CKpp5DH41ufeOzC1edE87Nf4DjswmsNYCiI6Q',
     range: 'IndentBackup!A2:A',
@@ -172,7 +171,6 @@ const writeDataStore = (internalUID, write) => {
 }
 
 const appendDataStore = (write) => {
-  console.log(write)
   appendJSON(JSON.stringify(write))
   dataStore = [...dataStore, {...write, internalUID: internalUID}]
   internalUID++
