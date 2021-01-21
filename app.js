@@ -63,6 +63,7 @@ client.query("SELECT my_data FROM mydata WHERE my_key='notifications';", (err, r
 var authenticated = false
 var sheets
 var queue = []
+var nueue = []
 
 const readline = require('readline');
 const {google} = require('googleapis');
@@ -101,11 +102,18 @@ function authenticate(auth) {
   authenticated = true
   const myQueue = queue
   queue = []
+  const myNueue = nueue
+  nueue = []
   appendJSONs(myQueue)
+  appendNSONs(myNueue)
 }
 
 function appendJSON(jsonObj) {
   appendJSONs([jsonObj])
+}
+
+function appendNSON(jsonObj) {
+  appendNSONs([jsonObj])
 }
 
 function appendJSONs(jsonObjs) {
@@ -136,7 +144,47 @@ function appendJSONs(jsonObjs) {
           for (property in obj) {
             obj[property] = ""+obj[property]
           }
-          return [obj.name, obj.startDateTime, obj.endDateTime, obj.origin, obj.destination, obj.POC, obj.POCPhone, obj.vehicles, obj.notes]
+          return [obj.internalUID, obj.name, obj.startDateTime, obj.endDateTime, obj.origin, obj.destination, obj.POC, obj.POCPhone, obj.vehicles, obj.notes]
+        })
+      }
+    }, (err, _)=>{
+      if (err) return console.log('The API returned an error: ' + err)
+    })
+  }
+  catch {
+
+  }
+}
+
+function appendNSONs(jsonObjs) {
+  if (authenticated === false) {
+    nueue.push(...jsonObjs)
+    return
+  }
+  try {
+    sheets.spreadsheets.values.append({
+      spreadsheetId: '1Rdp0Z4CKpp5DH41ufeOzC1edE87Nf4DjswmsNYCiI6Q',
+      range: 'NotificationsBackup!A2:A',
+      valueInputOption: "RAW",
+      resource: {
+        majorDimension: "ROWS",
+        values: jsonObjs.map(x => [JSON.stringify(x)])
+      }
+    }, (err, _)=>{
+      if (err) return console.log('The API returned an error: ' + err)
+    })
+    sheets.spreadsheets.values.append({
+      spreadsheetId: '1Rdp0Z4CKpp5DH41ufeOzC1edE87Nf4DjswmsNYCiI6Q',
+      range: 'Notifications!A2:I',
+      valueInputOption: "RAW",
+      resource: {
+        majorDimension: "ROWS",
+        values: jsonObjs.map(([x, title]) => {
+          const obj = {...x}
+          for (property in obj) {
+            obj[property] = ""+obj[property]
+          }
+          return [obj.internalUID, title, obj.title]
         })
       }
     }, (err, _)=>{
@@ -193,21 +241,23 @@ const writeDataStore = (internalUID, write) => {
 }
 
 const appendDataStore = (write) => {
-  appendJSON(write)
-  dataStore = [...dataStore, {...write, internalUID: internalUID}]
+  const insert = {...write, internalUID: internalUID}
+  appendJSON(insert)
+  dataStore = [...dataStore, insert]
   internalUID++
   overwriteUID()
   overwriteDS()
 }
 
-const appendNotifications = (write) => {
+const appendNotifications = (write, title) => {
+  appendNSON([write, title])
   notificationsStore = [...notificationsStore, write]
   overwriteNS()
 }
 
-const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: oldStatus}) => {
+const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: oldStatus, name: title}) => {
   if (status !== oldStatus && internalUID === oldUID) {
-    appendNotifications({title: "Indent \""+readDataStore(internalUID).name+"\" is now "+status, internalUID: internalUID})
+    appendNotifications({title: "Indent \""+readDataStore(internalUID).name+"\" is now "+status, internalUID: internalUID}, title)
     notifyN()
   }
 }
