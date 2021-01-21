@@ -113,17 +113,33 @@ function appendJSONs(jsonStrings) {
     queue.push(...jsonStrings)
     return
   }
-  sheets.spreadsheets.values.append({
-    spreadsheetId: '1Rdp0Z4CKpp5DH41ufeOzC1edE87Nf4DjswmsNYCiI6Q',
-    range: 'IndentBackup!A2:A',
-    valueInputOption: "RAW",
-    resource: {
-      majorDimension: "ROWS",
-      values: jsonStrings.map(x => [x])
-    }
-  }, (err, _)=>{
-    if (err) return console.log('The API returned an error: ' + err)
-  })
+  try {
+    sheets.spreadsheets.values.append({
+      spreadsheetId: '1Rdp0Z4CKpp5DH41ufeOzC1edE87Nf4DjswmsNYCiI6Q',
+      range: 'IndentBackup!A2:A',
+      valueInputOption: "RAW",
+      resource: {
+        majorDimension: "ROWS",
+        values: jsonStrings.map(x => [x])
+      }
+    }, (err, _)=>{
+      if (err) return console.log('The API returned an error: ' + err)
+    })
+    sheets.spreadsheets.values.append({
+      spreadsheetId: '1Rdp0Z4CKpp5DH41ufeOzC1edE87Nf4DjswmsNYCiI6Q',
+      range: 'Data!A2:I',
+      valueInputOption: "RAW",
+      resource: {
+        majorDimension: "ROWS",
+        values: jsonStrings.map(x => [x.name, x.startDateTime, x.endDateTime, x.origin, x.destination, x.POC, x.POCPhone, x.vehicles, x.notes])
+      }
+    }, (err, _)=>{
+      if (err) return console.log('The API returned an error: ' + err)
+    })
+  }
+  catch {
+
+  }
 }
 
 const readDataStore = (internalUID) => {
