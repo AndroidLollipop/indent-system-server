@@ -101,9 +101,7 @@ function authenticate(auth) {
   authenticated = true
   const myQueue = queue
   queue = []
-  console.log("myQueue:")
-  console.log(myQueue)
-  appendJSONs(myQueue)
+  //appendJSONs(myQueue)
 }
 
 function appendJSON(jsonString) {
