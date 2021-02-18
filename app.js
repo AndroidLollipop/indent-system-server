@@ -230,7 +230,7 @@ async function email_sendEmails(emails) {
   if (email_authenticated === false) {
     email_queue.push(...emails)
   }
-  for (let {senderTitle, recipientAddress, subject, message} of emails) {
+  for (let {senderTitle, recipientAddress, subject, message: emailMessage} of emails) {
     const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
     const messageParts = [
       `From: ${senderTitle} <${SENDER_ADDRESS}>`,
@@ -239,7 +239,7 @@ async function email_sendEmails(emails) {
       'MIME-Version: 1.0',
       `Subject: ${utf8Subject}`,
       '',
-      message
+      emailMessage
     ];
     const message = messageParts.join('\n');
 
@@ -250,14 +250,12 @@ async function email_sendEmails(emails) {
       .replace(/\//g, '_')
       .replace(/=+$/, '');
     
-    const res = await gmail.users.messages.send({
+    gmail.users.messages.send({
       userId: 'me',
       requestBody: {
         raw: encodedMessage,
       },
     });
-    console.log("EMAIL")
-    console.log(res)
   }
 }
 
