@@ -395,11 +395,14 @@ io.on("connection", (socket) => {
       }
       console.log(write.emailsNotify)
       appendDataStore(write)
+      console.log("appended")
       socket.emit("sendIndents", dataStore, token)
+      console.log("replied")
       notifyI(socket)
       if (Array.isArray(write.emailsNotify)) {
         for (let email of emailsNotify) {
           if (typeof email === "string")
+          console.log("sending email")
           email_sendEmail({senderTitle: "Indent System",
             recipientAddress: email,
             subject: `New indent: ${write.title}`,
