@@ -380,9 +380,11 @@ io.on("connection", (socket) => {
   })
   socket.on("appendDataStore", ([write, token]) => {
     try {
+      console.log(write)
       if (typeof write !== "object") {
         return
       }
+      console.log(write.emailsNotify)
       if (Array.isArray(write.emailsNotify)) {
         write.emailsNotify = write.emailsNotify.filter(x => {
           if (typeof x !== string) {
@@ -391,6 +393,7 @@ io.on("connection", (socket) => {
           return validateEmail(x)
         })
       }
+      console.log(write.emailsNotify)
       appendDataStore(write)
       socket.emit("sendIndents", dataStore, token)
       notifyI(socket)
