@@ -226,7 +226,7 @@ function email_sendEmail(email) {
   email_sendEmails([email])
 }
 
-function email_sendEmails(emails) {
+async function email_sendEmails(emails) {
   if (email_authenticated === false) {
     email_queue.push(...emails)
   }
