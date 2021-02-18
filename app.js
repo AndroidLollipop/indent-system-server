@@ -15,6 +15,11 @@ const postgresSafe = x => {
   return ret
 }
 
+const validateEmail = email => {
+  const re = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
+  return re.test(String(email).toLowerCase())
+}
+
 const client = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -226,7 +231,7 @@ function email_sendEmail(email) {
   email_sendEmails([email])
 }
 
-async function email_sendEmails(emails) {
+function email_sendEmails(emails) {
   if (email_authenticated === false) {
     email_queue.push(...emails)
   }
@@ -375,9 +380,30 @@ io.on("connection", (socket) => {
   })
   socket.on("appendDataStore", ([write, token]) => {
     try {
+      if (typeof write !== "object") {
+        return
+      }
+      if (Array.isArray(write.emailsNotify)) {
+        write.emailsNotify = write.emailsNotify.filter(x => {
+          if (typeof x !== string) {
+            return false
+          }
+          return validateEmail(x)
+        })
+      }
       appendDataStore(write)
       socket.emit("sendIndents", dataStore, token)
       notifyI(socket)
+      if (Array.isArray(write.emailsNotify)) {
+        for (let email of emailsNotify) {
+          if (typeof email === "string")
+          email_sendEmail({senderTitle: "Indent System",
+            recipientAddress: email,
+            subject: `New indent: ${write.title}`,
+            message: `<body><table><tr><th>Purpose</th><th>Start time</th><th>End time</th><th>Reporting location</th><th>Destination</th><th>Contact person</th><th>Contact person number</th><th>Vehicle type</th><th>Vehicle type</th><th>Vehicles</th><th>Notes</th><th>Status</th></tr><tr><td>${write.name}</td><td>${write.startDateTime}</td><td>${write.endDateTime}</td><td>${write.origin}</td><td>${write.destination}</td><td>${write.POC}</td><td>${write.POCPhone}</td><td>${write.system}</td><td>${write.vehicles}</td><td>${write.notes}</td><td>${write.status}</td></tr></table></body>`
+          })
+        }
+      }
     }
     catch {
 
