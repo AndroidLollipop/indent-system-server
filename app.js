@@ -255,12 +255,12 @@ function email_sendEmails(emails) {
       .replace(/\//g, '_')
       .replace(/=+$/, '');
     
-    gmail.users.messages.send({
+    (async () => console.log(await gmail.users.messages.send({
       userId: 'me',
       requestBody: {
         raw: encodedMessage,
       },
-    });
+    })))();
   }
 }
 
@@ -380,11 +380,9 @@ io.on("connection", (socket) => {
   })
   socket.on("appendDataStore", ([write, token]) => {
     try {
-      console.log(write)
       if (typeof write !== "object") {
         return
       }
-      console.log(write.emailsNotify)
       if (Array.isArray(write.emailsNotify)) {
         write.emailsNotify = write.emailsNotify.filter(x => {
           if (typeof x !== "string") {
@@ -393,11 +391,8 @@ io.on("connection", (socket) => {
           return validateEmail(x)
         })
       }
-      console.log(write.emailsNotify)
       appendDataStore(write)
-      console.log("appended")
       socket.emit("sendIndents", dataStore, token)
-      console.log("replied")
       notifyI(socket)
       if (Array.isArray(write.emailsNotify)) {
         for (let email of emailsNotify) {
