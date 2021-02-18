@@ -68,12 +68,6 @@ var nueue = []
 const readline = require('readline');
 const {google} = require('googleapis');
 
-// If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-// The file token.json stores the user's access and refresh tokens, and is
-// created automatically when the authorization flow completes for the first
-// time.
-
 // Load client secrets from a local file.
 authorize(JSON.parse(process.env.CREDENTIALS_JSON), authenticate);
 
@@ -195,6 +189,82 @@ function appendNSONs(jsonObjs) {
 
   }
 }
+
+var email_authenticated = false
+var gmail
+var email_queue = []
+const SENDER_ADDRESS = "tolueneeisner@gmail.com"
+
+// Load client secrets from a local file.
+email_authorize(JSON.parse(process.env.EMAIL_CREDENTIALS_JSON), email_authenticate);
+
+/**
+ * Create an OAuth2 client with the given credentials, and then execute the
+ * given callback function.
+ * @param {Object} credentials The authorization client credentials.
+ * @param {function} callback The callback to call with the authorized client.
+ */
+function email_authorize(credentials, callback) {
+  const {client_secret, client_id, redirect_uris} = credentials.installed;
+  const oAuth2Client = new google.auth.OAuth2(
+      client_id, client_secret, redirect_uris[0]);
+
+  // Check if we have previously stored a token.
+  oAuth2Client.setCredentials(JSON.parse(process.env.EMAIL_TOKEN_JSON));
+  callback(oAuth2Client);
+}
+
+function email_authenticate(auth) {
+  gmail = google.gmail({version: 'v1', auth})
+  email_authenticated = true
+  const myEmails = email_queue
+  email_queue = []
+  email_sendEmails(myEmails)
+}
+
+function email_sendEmail(email) {
+  email_sendEmails([email])
+}
+
+function email_sendEmails(emails) {
+  if (email_authenticated === false) {
+    email_queue.push(...emails)
+  }
+  for (let {senderTitle, recipientAddress, subject, message} of emails) {
+    const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+    const messageParts = [
+      `From: ${senderTitle} <${SENDER_ADDRESS}>`,
+      `To: <${recipientAddress}>`,
+      'Content-Type: text/html; charset=utf-8',
+      'MIME-Version: 1.0',
+      `Subject: ${utf8Subject}`,
+      '',
+      message
+    ];
+    const message = messageParts.join('\n');
+
+    // The body needs to be base64url encoded.
+    const encodedMessage = Buffer.from(message)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    
+    const res = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: encodedMessage,
+      },
+    });
+    console.log(res)
+  }
+}
+
+email_sendEmail({senderTitle: "Indent System",
+  recipientAddress: "tolueneeisner@gmail.com",
+  subject: "🤘 Hello 🤘",
+  message: "This is a message just to say hello.\nSo... <b>Hello!</b>  🤘❤️😎"
+})
 
 const readDataStore = (internalUID) => {
   const result = dataStore.filter(x => x.internalUID === internalUID)
