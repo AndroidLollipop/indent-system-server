@@ -411,8 +411,8 @@ io.on("connection", (socket) => {
         }
       }
     }
-    catch {
-
+    catch (e) {
+      console.log(e)
     }
   })
 });
