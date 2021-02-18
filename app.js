@@ -255,12 +255,12 @@ function email_sendEmails(emails) {
       .replace(/\//g, '_')
       .replace(/=+$/, '');
     
-    (async () => console.log(await gmail.users.messages.send({
+    gmail.users.messages.send({
       userId: 'me',
       requestBody: {
         raw: encodedMessage,
       },
-    })))();
+    });
   }
 }
 
@@ -397,10 +397,9 @@ io.on("connection", (socket) => {
       if (Array.isArray(write.emailsNotify)) {
         for (let email of write.emailsNotify) {
           if (typeof email === "string")
-          console.log("sending email")
           email_sendEmail({senderTitle: "Indent System",
             recipientAddress: email,
-            subject: `New indent: ${write.title}`,
+            subject: `New indent: ${write.name}`,
             message: `<body><table><tr><th>Purpose</th><th>Start time</th><th>End time</th><th>Reporting location</th><th>Destination</th><th>Contact person</th><th>Contact person number</th><th>Vehicle type</th><th>Vehicle type</th><th>Vehicles</th><th>Notes</th><th>Status</th></tr><tr><td>${write.name}</td><td>${write.startDateTime}</td><td>${write.endDateTime}</td><td>${write.origin}</td><td>${write.destination}</td><td>${write.POC}</td><td>${write.POCPhone}</td><td>${write.system}</td><td>${write.vehicles}</td><td>${write.notes}</td><td>${write.status}</td></tr></table></body>`
           })
         }
