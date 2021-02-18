@@ -256,6 +256,7 @@ async function email_sendEmails(emails) {
         raw: encodedMessage,
       },
     });
+    console.log("EMAIL")
     console.log(res)
   }
 }
