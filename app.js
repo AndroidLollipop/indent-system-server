@@ -305,13 +305,15 @@ const overwriteUID = () => {
 
 const writeDataStore = (internalUID, write) => {
   const index = dataStore.findIndex(x => x.internalUID === internalUID)
+  var result = false
   if (index > -1 && index < dataStore.length) {
     dataStore = [...dataStore]
     //MOCK SERVER, REMOVE IN PRODUCTION
-    acknowledgeEdit(write, dataStore[index])
+    result = acknowledgeEdit(write, dataStore[index])
     dataStore[index] = write
     overwriteDS()
   }
+  return result
 }
 
 const appendDataStore = (write) => {
@@ -333,7 +335,9 @@ const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: ol
   if (status !== oldStatus && internalUID === oldUID) {
     appendNotifications({title: "Indent \""+readDataStore(internalUID).name+"\" is now "+status, internalUID: internalUID}, title)
     notifyN()
+    return true
   }
+  return false
 }
 
 const port = process.env.PORT || 4001;
@@ -370,9 +374,22 @@ io.on("connection", (socket) => {
   })
   socket.on("writeDataStore", ([internalUID, write, token]) => {
     try {
-      writeDataStore(internalUID, write)
+      const edited = writeDataStore(internalUID, write)
       socket.emit("sendIndents", dataStore)
       notifyI(socket)
+      if (edited === true) {
+        if (Array.isArray(write.emailsNotify)) {
+          for (let email of write.emailsNotify) {
+            if (typeof email === "string") {
+              email_sendEmail({senderTitle: "Indent System",
+                recipientAddress: email,
+                subject: `Indent ${write.status}: ${write.name}`,
+                message: `<body>Indent <b>${write.name}</b> is now <b>${write.status}</b><table><tr><th>Purpose</th><th>Start time</th><th>End time</th><th>Reporting location</th><th>Destination</th><th>Contact person</th><th>Contact person number</th><th>Vehicle type</th><th>Vehicles</th><th>Notes</th><th>Status</th></tr><tr><td>${write.name}</td><td>${write.startDateTime}</td><td>${write.endDateTime}</td><td>${write.origin}</td><td>${write.destination}</td><td>${write.POC}</td><td>${write.POCPhone}</td><td>${write.system}</td><td>${write.vehicles}</td><td>${write.notes}</td><td>${write.status}</td></tr></table></body>`
+              })
+            }
+          }
+        }
+      }
     }
     catch {
 
@@ -396,12 +413,13 @@ io.on("connection", (socket) => {
       notifyI(socket)
       if (Array.isArray(write.emailsNotify)) {
         for (let email of write.emailsNotify) {
-          if (typeof email === "string")
-          email_sendEmail({senderTitle: "Indent System",
-            recipientAddress: email,
-            subject: `New indent: ${write.name}`,
-            message: `<body><table><tr><th>Purpose</th><th>Start time</th><th>End time</th><th>Reporting location</th><th>Destination</th><th>Contact person</th><th>Contact person number</th><th>Vehicle type</th><th>Vehicles</th><th>Notes</th><th>Status</th></tr><tr><td>${write.name}</td><td>${write.startDateTime}</td><td>${write.endDateTime}</td><td>${write.origin}</td><td>${write.destination}</td><td>${write.POC}</td><td>${write.POCPhone}</td><td>${write.system}</td><td>${write.vehicles}</td><td>${write.notes}</td><td>${write.status}</td></tr></table></body>`
-          })
+          if (typeof email === "string") {
+            email_sendEmail({senderTitle: "Indent System",
+              recipientAddress: email,
+              subject: `New indent: ${write.name}`,
+              message: `<body>Indent <b>${write.name}</b> has been made and is now <b>Pending</b><table><tr><th>Purpose</th><th>Start time</th><th>End time</th><th>Reporting location</th><th>Destination</th><th>Contact person</th><th>Contact person number</th><th>Vehicle type</th><th>Vehicles</th><th>Notes</th><th>Status</th></tr><tr><td>${write.name}</td><td>${write.startDateTime}</td><td>${write.endDateTime}</td><td>${write.origin}</td><td>${write.destination}</td><td>${write.POC}</td><td>${write.POCPhone}</td><td>${write.system}</td><td>${write.vehicles}</td><td>${write.notes}</td><td>${write.status}</td></tr></table></body>`
+            })
+          }
         }
       }
     }
