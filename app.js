@@ -387,7 +387,7 @@ io.on("connection", (socket) => {
       console.log(write.emailsNotify)
       if (Array.isArray(write.emailsNotify)) {
         write.emailsNotify = write.emailsNotify.filter(x => {
-          if (typeof x !== string) {
+          if (typeof x !== "string") {
             return false
           }
           return validateEmail(x)
@@ -411,8 +411,8 @@ io.on("connection", (socket) => {
         }
       }
     }
-    catch (e) {
-      console.log(e)
+    catch {
+      
     }
   })
 });
