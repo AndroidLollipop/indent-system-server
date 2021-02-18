@@ -150,8 +150,8 @@ function appendJSONs(jsonObjs) {
       if (err) return console.log('The API returned an error: ' + err)
     })
   }
-  catch {
-
+  catch (e) {
+    console.log(e)
   }
 }
 
@@ -190,8 +190,8 @@ function appendNSONs(jsonObjs) {
       if (err) return console.log('The API returned an error: ' + err)
     })
   }
-  catch {
-
+  catch (e) {
+    console.log(e)
   }
 }
 
@@ -391,8 +391,8 @@ io.on("connection", (socket) => {
         }
       }
     }
-    catch {
-
+    catch (e) {
+      console.log(e)
     }
   })
   socket.on("appendDataStore", ([write, token]) => {
