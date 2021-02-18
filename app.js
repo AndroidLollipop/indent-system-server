@@ -395,7 +395,7 @@ io.on("connection", (socket) => {
       socket.emit("sendIndents", dataStore, token)
       notifyI(socket)
       if (Array.isArray(write.emailsNotify)) {
-        for (let email of emailsNotify) {
+        for (let email of write.emailsNotify) {
           if (typeof email === "string")
           console.log("sending email")
           email_sendEmail({senderTitle: "Indent System",
