@@ -333,7 +333,7 @@ const appendNotifications = (write, title) => {
 
 const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: oldStatus, name: title}) => {
   if (status !== oldStatus && internalUID === oldUID) {
-    appendNotifications({title: "Indent \""+readDataStore(internalUID).name+"\" is now "+status, internalUID: internalUID}, title)
+    appendNotifications({title: "Indent \""+readDataStore(internalUID).name+"\" has been "+status, internalUID: internalUID}, title)
     notifyN()
     return true
   }
