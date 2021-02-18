@@ -333,7 +333,7 @@ const appendNotifications = (write, title) => {
 
 const acknowledgeEdit = ({internalUID, status}, {internalUID: oldUID, status: oldStatus, name: title}) => {
   if (status !== oldStatus && internalUID === oldUID) {
-    appendNotifications({title: "Indent \""+readDataStore(internalUID).name+"\" has been "+status, internalUID: internalUID}, title)
+    appendNotifications({title: "Indent \""+readDataStore(internalUID).name+"\" is now "+status, internalUID: internalUID}, title)
     notifyN()
     return true
   }
@@ -384,7 +384,7 @@ io.on("connection", (socket) => {
               email_sendEmail({senderTitle: "Indent System",
                 recipientAddress: email,
                 subject: `Indent ${write.status}: ${write.name}`,
-                message: `<body>Indent <b>${write.name}</b> is now <b>${write.status}</b><table><tr><th>Purpose</th><th>Start time</th><th>End time</th><th>Reporting location</th><th>Destination</th><th>Contact person</th><th>Contact person number</th><th>Vehicle type</th><th>Vehicles</th><th>Notes</th><th>Status</th></tr><tr><td>${write.name}</td><td>${write.startDateTime}</td><td>${write.endDateTime}</td><td>${write.origin}</td><td>${write.destination}</td><td>${write.POC}</td><td>${write.POCPhone}</td><td>${write.system}</td><td>${write.vehicles}</td><td>${write.notes}</td><td>${write.status}</td></tr></table></body>`
+                message: `<body>Indent <b>${write.name}</b> has been <b>${write.status}</b><table><tr><th>Purpose</th><th>Start time</th><th>End time</th><th>Reporting location</th><th>Destination</th><th>Contact person</th><th>Contact person number</th><th>Vehicle type</th><th>Vehicles</th><th>Notes</th><th>Status</th></tr><tr><td>${write.name}</td><td>${write.startDateTime}</td><td>${write.endDateTime}</td><td>${write.origin}</td><td>${write.destination}</td><td>${write.POC}</td><td>${write.POCPhone}</td><td>${write.system}</td><td>${write.vehicles}</td><td>${write.notes}</td><td>${write.status}</td></tr></table></body>`
               })
             }
           }
