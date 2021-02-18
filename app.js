@@ -317,7 +317,7 @@ const writeDataStore = (internalUID, write) => {
 }
 
 const appendDataStore = (write) => {
-  const insert = {...write, internalUID: internalUID}
+  const insert = {...write, status: "Pending", internalUID: internalUID}
   appendJSON(insert)
   dataStore = [...dataStore, insert]
   internalUID++
