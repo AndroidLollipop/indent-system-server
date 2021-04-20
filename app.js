@@ -375,7 +375,7 @@ io.on("connection", (socket) => {
   socket.on("writeDataStore", ([internalUID, write, token]) => {
     try {
       const edited = writeDataStore(internalUID, write)
-      socket.emit("sendIndents", dataStore)
+      socket.emit("sendIndents", dataStore, token)
       notifyI(socket)
       if (edited === true) {
         if (Array.isArray(write.emailsNotify)) {
